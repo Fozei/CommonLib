@@ -1,1 +1,1 @@
-include ':app', 'volley', ':libserver'
+include ':app', 'volley', ':libserver', ':libdevsearch', ':libserialhelper'
