@@ -30,6 +30,6 @@ dependencies {
     compile 'com.alibaba:fastjson:1.1.64.android'
     compile project(':volley')
     implementation project(':libserver')
-    implementation project(':libdevsearch')
     implementation project(':libserialhelper')
+    implementation project(':libdevsearch')
 }

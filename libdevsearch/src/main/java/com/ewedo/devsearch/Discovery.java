@@ -16,8 +16,7 @@ public class Discovery {
 
     /**
      * Starts the host scanning
-     *
-     * @param count    IP address
+     *  @param count    IP address
      * @param cidr     Classless Inter-Domain Routing
      * @param timeout  Socket timeout
      * @param callback call back

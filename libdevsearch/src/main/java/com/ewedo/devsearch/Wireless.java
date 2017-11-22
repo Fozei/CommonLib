@@ -21,7 +21,7 @@ import java.util.Enumeration;
  * Created by fozei on 17-11-7.
  */
 
-class Wireless {
+public class Wireless {
     private Context context;
 
     /**
@@ -134,7 +134,14 @@ class Wireless {
      * @return Local WiFi network LAN IP address
      */
     public <T> T getInternalWifiIpAddress(Class<T> type) throws UnknownHostException {
+
         int ip = getWifiInfo().getIpAddress();
+//        byte[] arr = new byte[4];
+//        for (int i = 0; i < arr.length; i++) {
+//            //数组中第一个元素，
+//            arr[i] = (byte) (ip >> 8 * i & 0xFF);
+//        }
+//        Log.i("***", "Wireless.getInternalWifiIpAddress: " + Arrays.toString(arr));
 
         //Endianness can be a potential issue on some hardware
         if (ByteOrder.nativeOrder().equals(ByteOrder.LITTLE_ENDIAN)) {
@@ -142,7 +149,6 @@ class Wireless {
         }
 
         byte[] ipByteArray = BigInteger.valueOf(ip).toByteArray();
-
 
         if (type.isInstance("")) {
             return type.cast(InetAddress.getByAddress(ipByteArray).getHostAddress());
