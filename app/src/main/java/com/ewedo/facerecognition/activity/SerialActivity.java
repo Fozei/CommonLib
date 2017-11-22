@@ -63,7 +63,19 @@ public class SerialActivity extends Activity {
         };
         try {
             helper.open();
-            helper.sendHex("02000231310303");
+            getWindow().getDecorView().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+//            helper.sendAutoDetect();
+//            helper.sendReset();
+//            helper.sendSearchM1Card();
+//            helper.getM1Sn();
+//            helper.checkPassA((byte) 0x00, new byte[]{0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F});
+//                    helper.checkPassB((byte) 0x00, new byte[]{0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F});
+                    helper.readSegmentData((byte) 0x00, (byte) 0x00);
+                }
+            }, 3000);
+
         } catch (IOException e) {
             Log.i("***", "SerialActivity.onCreate: " + e.getMessage());
             e.printStackTrace();
@@ -79,4 +91,8 @@ public class SerialActivity extends Activity {
     //开始 长度 长度 命令 命令参数  卡类型状态字  卡类型状态字 结束 BCC
     //[2,  0,  4,   49, 49,        48,           57,     3, 12]
 
+    //寻卡操作返回 hex：[02    00  02  35  30  03  06]
+    //                        操作状态 P
+    //十进制 [2, 0, 3, 53, 48,    78,     3, 73]
+    //      [2, 0, 3, 53, 48,    89,    3, 94]
 }

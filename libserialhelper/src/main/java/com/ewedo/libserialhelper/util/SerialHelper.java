@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.InvalidParameterException;
+import java.util.Arrays;
 
 /**
  * Created by fozei on 17-11-16.
@@ -176,6 +177,64 @@ public abstract class SerialHelper {
 
     //----------------------------------------------------
     protected abstract void onDataReceived(ComBean ComRecData);
+
+    public void sendAutoDetect() {
+        byte[] autoDetect = {0x31, 0x31};
+        byte[] bOutArray = CmdBuilder.buildSimpleCmd(autoDetect);
+        Log.i("***", "SerialHelper.sendAutoDetect: " + Arrays.toString(bOutArray));
+//        byte[] bOutArray = MyFunc.HexToByteArr(sHex);
+        send(bOutArray);
+    }
+
+    public void sendReset() {
+        byte[] autoDetect = {0x30, 0x30};
+        byte[] bOutArray = CmdBuilder.buildSimpleCmd(autoDetect);
+        Log.i("***", "SerialHelper.sendAutoDetect: " + Arrays.toString(bOutArray));
+//        byte[] bOutArray = MyFunc.HexToByteArr(sHex);
+        send(bOutArray);
+    }
+
+    public void sendSearchM1Card() {
+        byte[] autoDetect = {0x35, 0x30};
+        byte[] bOutArray = CmdBuilder.buildSimpleCmd(autoDetect);
+        Log.i("***", "SerialHelper.sendAutoDetect: " + Arrays.toString(bOutArray));
+//        byte[] bOutArray = MyFunc.HexToByteArr(sHex);
+        send(bOutArray);
+    }
+
+    public void getM1Sn() {
+        byte[] autoDetect = {0x35, 0x31};
+        byte[] bOutArray = CmdBuilder.buildSimpleCmd(autoDetect);
+        Log.i("***", "SerialHelper.sendAutoDetect: " + Arrays.toString(bOutArray));
+//        byte[] bOutArray = MyFunc.HexToByteArr(sHex);
+        send(bOutArray);
+    }
+
+    public void checkPassA(byte segment, byte[] pwd) {
+        // TODO: 17-11-16 长度校验
+        // TODO: 17-11-17 结果返回
+        byte[] cmd = {0x35, 0x32};
+        byte[] bOutArray = CmdBuilder.buildCmdWithData(cmd, segment, pwd);
+        Log.i("***", "SerialHelper.sendAutoDetect: " + Arrays.toString(bOutArray));
+//        byte[] bOutArray = MyFunc.HexToByteArr(sHex);
+        send(bOutArray);
+    }
+
+    public void checkPassB(byte segment, byte[] pwd) {
+        // TODO: 17-11-16 长度校验
+        // TODO: 17-11-17 结果返回
+        byte[] cmd = {0x35, 0x39};
+        byte[] bOutArray = CmdBuilder.buildCmdWithData(cmd, segment, pwd);
+        Log.i("***", "SerialHelper.sendAutoDetect: " + Arrays.toString(bOutArray));
+        send(bOutArray);
+    }
+
+    public void readSegmentData(byte segment, byte bound) {
+        byte[] cmd = {0x35, 0x33};
+        byte[] bOutArray = CmdBuilder.buildReadDataCmd(cmd, segment, bound);
+        Log.i("***", "SerialHelper.before send : " + Arrays.toString(bOutArray));
+        send(bOutArray);
+    }
 
     //----------------------------------------------------
     private class ReadThread extends Thread {

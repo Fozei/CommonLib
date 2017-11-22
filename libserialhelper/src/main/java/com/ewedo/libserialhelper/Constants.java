@@ -6,16 +6,16 @@ package com.ewedo.libserialhelper;
 
 public class Constants {
     // 传输控制字符
-    public static int STX = 0x02;
+    public static byte STX = 0x02;
     //卡机肯定响应
-    public static int ACK = 0x06;
+    public static byte ACK = 0x06;
     //卡机否定响应
-    public static int NAK = 0x15;
+    public static byte NAK = 0x15;
     //主机确认
-    public static int ENQ = 0x05;
-    public static int ETX = 0x03;
+    public static byte ENQ = 0x05;
+    public static byte ETX = 0x03;
     //主机取消
-    public static int EOT = 0x04;
+    public static byte EOT = 0x04;
 
     //card type
     //    卡类型状态字S1            卡类型状态字S2    卡类型说明
@@ -26,13 +26,17 @@ public class Constants {
 //          ‘0’                    ‘4’   51     卡为 ISO1443 TYPEA CPU 卡
 //          ‘0’                    ‘5’   52     卡为 ISO1443 TYPEB CPU 卡
 //          ‘0’                    ‘9’   57     卡为非接触式射频卡但未知类型
-    public static int TYPE_SEGMENT_A_UNKDOWN = 78;
-    public static int TYPE_SEGMENT_A_KNOWN = 48;
+    public static byte TYPE_SEGMENT_A_UNKDOWN = 78;
+    public static byte TYPE_SEGMENT_A_KNOWN = 48;
 
-    public static int TYPE_SEGMENT_B_S50 = 48;
-    public static int TYPE_SEGMENT_B_S70 = 49;
-    public static int TYPE_SEGMENT_B_UL = 50;
-    public static int TYPE_SEGMENT_B_TYPEA = 51;
-    public static int TYPE_SEGMENT_B_TYPEB = 52;
-    public static int TYPE_SEGMENT_B_PART_KNOWN = 57;
+    public static byte TYPE_SEGMENT_B_S50 = 48;
+    public static byte TYPE_SEGMENT_B_S70 = 49;
+    public static byte TYPE_SEGMENT_B_UL = 50;
+    public static byte TYPE_SEGMENT_B_TYPEA = 51;
+    public static byte TYPE_SEGMENT_B_TYPEB = 52;
+    public static byte TYPE_SEGMENT_B_PART_KNOWN = 57;
+
+    //search result
+    public static byte SEARCH_CARD_RESULT_SUCCESS = 89;
+    public static byte SEARCH_CARD_RESULT_FAILURE = 78;
 }
