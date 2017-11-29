@@ -52,15 +52,41 @@ public class SerialActivity extends Activity {
                         executorService.execute(new Runnable() {
                             @Override
                             public void run() {
-                                SystemClock.sleep(3000);
+                                SystemClock.sleep(1000);
                                 helper.sendHex("05");
                             }
                         });
 
                     }
                 }
+                if (comBean.bRec.length == 9) {
+                    if (comBean.bRec[3] == (byte) 0x35 && comBean.bRec[4] == (byte) 0x32) {
+                        byte operationResult = comBean.bRec[6];
+                        switch (operationResult) {
+                            case 0x59:
+                                Log.i("***", "SerialActivity.onDataReceived: 下载密码成功");
+                                //读数据
+//                                helper.readSegmentData(comBean.bRec[5], (byte) 0x00);
+//                                helper.readSegmentData(comBean.bRec[5], (byte) 0x01);
+//                                helper.readSegmentData(comBean.bRec[5], (byte) 0x02);
+                                helper.readSegmentData(comBean.bRec[5], (byte) 0x03);
+                                //写数据
+
+
+                                break;
+                            case 0X30:
+                                Log.i("***", "SerialActivity.onDataReceived: 寻不到射频卡");
+                                break;
+                            case 0X33:
+                                Log.i("***", "SerialActivity.onDataReceived: 密码错误");
+                                break;
+                        }
+                    }
+                }
             }
         };
+
+
         try {
             helper.open();
             getWindow().getDecorView().postDelayed(new Runnable() {
@@ -70,9 +96,9 @@ public class SerialActivity extends Activity {
 //            helper.sendReset();
 //            helper.sendSearchM1Card();
 //            helper.getM1Sn();
-//            helper.checkPassA((byte) 0x00, new byte[]{0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F});
-//                    helper.checkPassB((byte) 0x00, new byte[]{0x0F, 0x0F, 0x0F, 0x0F, 0x0F, 0x0F});
-                    helper.readSegmentData((byte) 0x00, (byte) 0x00);
+                    helper.checkPassA((byte) 0x00, new byte[]{(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF});
+//                    helper.checkPassB((byte) 0x00, new byte[]{(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF});
+//                    helper.readSegmentData((byte) 0x00, (byte) 0x00);
                 }
             }, 3000);
 
@@ -95,4 +121,11 @@ public class SerialActivity extends Activity {
     //                        操作状态 P
     //十进制 [2, 0, 3, 53, 48,    78,     3, 73]
     //      [2, 0, 3, 53, 48,    89,    3, 94]
+
+    //读数据返回
+    //开始 长度 长度 命令  命令 扇区 块号 状态字 |---------------------------- 数据 ------------------------------------| 结束 BCC
+    //[2,  0,  21,  53,  51,  0,  0,  89,   -117, -23, -125, 35, -62, 8, 4, 0, 98, 99, 100, 101, 102, 103, 104, 105, 3,  71]
+    //[2,  0,  21,  53,  51,  0,  1,  89,     0,    0,   0,   0,   0, 0, 0, 0,  0,  0,   0,   0,  0,    0,   0,  0,  3,  74]
+    //[2,  0,  21,  53,  51,  0,  2,  89,     0,    0,   0,   0,   0, 0, 0, 0,  0,  0,   0,   0,  0,    0,   0,  0,  3,  73]
+    //[2,  0,  21,  53,  51,  0,  3,  89,     0,    0,   0,   0,   0, 0, -1,7, -128,105, -1, -1, -1,   -1,  -1,  -1, 3,  89]
 }

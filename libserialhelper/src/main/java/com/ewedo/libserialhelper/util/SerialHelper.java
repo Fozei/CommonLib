@@ -74,11 +74,9 @@ public abstract class SerialHelper {
 
     //----------------------------------------------------
     public void send(byte[] bOutArray) {
-        try {
-            mOutputStream.write(bOutArray);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        setbLoopData(bOutArray);
+        mSendThread.setResume();
+//            mOutputStream.write(bOutArray);
     }
 
     //----------------------------------------------------
@@ -215,7 +213,7 @@ public abstract class SerialHelper {
         // TODO: 17-11-17 结果返回
         byte[] cmd = {0x35, 0x32};
         byte[] bOutArray = CmdBuilder.buildCmdWithData(cmd, segment, pwd);
-        Log.i("***", "SerialHelper.sendAutoDetect: " + Arrays.toString(bOutArray));
+        Log.i("***", "SerialHelper.checkPassA: " + Arrays.toString(bOutArray));
 //        byte[] bOutArray = MyFunc.HexToByteArr(sHex);
         send(bOutArray);
     }
@@ -232,7 +230,7 @@ public abstract class SerialHelper {
     public void readSegmentData(byte segment, byte bound) {
         byte[] cmd = {0x35, 0x33};
         byte[] bOutArray = CmdBuilder.buildReadDataCmd(cmd, segment, bound);
-        Log.i("***", "SerialHelper.before send : " + Arrays.toString(bOutArray));
+        Log.i("***", "SerialHelper readSegmentData : " + Arrays.toString(bOutArray));
         send(bOutArray);
     }
 
@@ -244,6 +242,7 @@ public abstract class SerialHelper {
                 try {
                     if (mInputStream == null) return;
                     byte[] buffer = new byte[512];
+                    //阻塞式方法
                     int size = mInputStream.read(buffer);
                     if (size > 0) {
                         // TODO: 17-11-16
@@ -271,6 +270,7 @@ public abstract class SerialHelper {
         public void run() {
             super.run();
             while (!isInterrupted()) {
+                Log.i("***", "SendThread.run: write++++++++++");
                 synchronized (this) {
                     while (suspendFlag) {
                         try {
@@ -280,7 +280,15 @@ public abstract class SerialHelper {
                         }
                     }
                 }
-                send(getbLoopData());
+
+                try {
+                    mOutputStream.write(getbLoopData());
+                    setSuspendFlag();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+
                 try {
                     Thread.sleep(iDelay);
                 } catch (InterruptedException e) {
@@ -296,6 +304,7 @@ public abstract class SerialHelper {
 
         //唤醒线程
         public synchronized void setResume() {
+            Log.i("***", "SendThread.setResume: notify");
             this.suspendFlag = false;
             notify();
         }
