@@ -45,10 +45,10 @@ public class SerialActivity extends Activity {
 
             @Override
             protected void onDataReceived(ComBean comBean) {
-                Log.i("***", "SerialActivity.onDataReceived: " + comBean);
+                Log.i("***", "SerialActivity.onDataReceived: " + comBean.bRec.length + ":::" + comBean);
                 if (comBean.bRec.length == 1) {
                     if (comBean.bRec[0] == Constants.ACK) {
-                        Log.i("***", "SerialActivity.onDataReceived: -----");
+                        Log.i("***", "SerialActivity.onDataReceived: -----卡机状态OK，回复确认！");
                         executorService.execute(new Runnable() {
                             @Override
                             public void run() {
@@ -67,9 +67,9 @@ public class SerialActivity extends Activity {
                                 Log.i("***", "SerialActivity.onDataReceived: 下载密码成功");
                                 //读数据
 //                                helper.readSegmentData(comBean.bRec[5], (byte) 0x00);
-//                                helper.readSegmentData(comBean.bRec[5], (byte) 0x01);
+                                helper.readSegmentData(comBean.bRec[5], (byte) 0x01);
 //                                helper.readSegmentData(comBean.bRec[5], (byte) 0x02);
-                                helper.readSegmentData(comBean.bRec[5], (byte) 0x03);
+//                                helper.readSegmentData(comBean.bRec[5], (byte) 0x03);
                                 //写数据
 
 
@@ -80,6 +80,35 @@ public class SerialActivity extends Activity {
                             case 0X33:
                                 Log.i("***", "SerialActivity.onDataReceived: 密码错误");
                                 break;
+                        }
+                    }
+                }
+
+                if (comBean.bRec.length == 26) {
+                    if (comBean.bRec[3] == (byte) 0x35 && comBean.bRec[4] == (byte) 0x33) {
+                        byte operationResult = comBean.bRec[7];
+                        switch (operationResult) {
+                            case 0x59:
+                                //写数据
+                                Log.i("***", "SerialActivity.onDataReceived: 写数据");
+                                helper.writeSegmentData(comBean.bRec[5], comBean.bRec[6], new byte[]{8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8});
+                                break;
+                            case 0X30:
+                                Log.i("***", "SerialActivity.onDataReceived: 寻不到RF卡");
+                                break;
+                            case 0X31:
+                                Log.i("***", "SerialActivity.onDataReceived: 操作扇区号错(不是验证密码后的扇区)");
+                                break;
+                            case 0X32:
+                                Log.i("***", "SerialActivity.onDataReceived: 操作的卡序列号错");
+                                break;
+                            case 0X33:
+                                Log.i("***", "SerialActivity.onDataReceived: 密码验证错");
+                                break;
+                            case 0X34:
+                                Log.i("***", "SerialActivity.onDataReceived: 读数据错");
+                                break;
+
                         }
                     }
                 }

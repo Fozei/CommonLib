@@ -234,6 +234,13 @@ public abstract class SerialHelper {
         send(bOutArray);
     }
 
+    public void writeSegmentData(byte segment, byte area, byte[] data) {
+        byte[] cmd = {0x35, 0x34};
+        byte[] bOutArray = CmdBuilder.buildWriteDataCmd(cmd, segment, area, data);
+        Log.i("***", "SerialHelper writeSegmentData : " + Arrays.toString(bOutArray));
+        send(bOutArray);
+    }
+
     //----------------------------------------------------
     private class ReadThread extends Thread {
         @Override

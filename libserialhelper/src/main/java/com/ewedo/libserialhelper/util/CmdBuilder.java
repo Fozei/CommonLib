@@ -73,4 +73,25 @@ class CmdBuilder {
         }
         return bcc;
     }
+
+    public static byte[] buildWriteDataCmd(byte[] cmd, byte segment, byte area, byte[] data) {
+        byte[] result = new byte[26];
+        int index = 0;
+        result[index++] = Constants.STX;
+        result[index++] = (byte) (0x00);
+        result[index++] = (byte) (cmd.length + 2 + data.length);
+        for (byte aCmd : cmd) {
+            result[index++] = aCmd;
+        }
+        result[index++] = segment;
+        result[index++] = area;
+
+        for (byte aData : data) {
+            result[index++] = aData;
+        }
+
+        result[index++] = Constants.ETX;
+        result[index] = generateBcc(result);
+        return result;
+    }
 }
