@@ -7,7 +7,6 @@
       <module fileurl="file://$PROJECT_DIR$/libdevsearch/libdevsearch.iml" filepath="$PROJECT_DIR$/libdevsearch/libdevsearch.iml" />
       <module fileurl="file://$PROJECT_DIR$/libserialhelper/libserialhelper.iml" filepath="$PROJECT_DIR$/libserialhelper/libserialhelper.iml" />
       <module fileurl="file://$PROJECT_DIR$/libserver/libserver.iml" filepath="$PROJECT_DIR$/libserver/libserver.iml" />
-      <module fileurl="file://$PROJECT_DIR$/libserver/mylibrary.iml" filepath="$PROJECT_DIR$/libserver/mylibrary.iml" />
       <module fileurl="file://$PROJECT_DIR$/volley/volley.iml" filepath="$PROJECT_DIR$/volley/volley.iml" />
     </modules>
   </component>
