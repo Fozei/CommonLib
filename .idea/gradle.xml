@@ -12,6 +12,7 @@
             <option value="$PROJECT_DIR$/libdevsearch" />
             <option value="$PROJECT_DIR$/libserialhelper" />
             <option value="$PROJECT_DIR$/libserver" />
+            <option value="$PROJECT_DIR$/libvideocache" />
             <option value="$PROJECT_DIR$/volley" />
           </set>
         </option>
