@@ -32,7 +32,8 @@ dependencies {
     implementation project(':libserver')
     implementation project(':libserialhelper')
     implementation project(':libdevsearch')
-//    # required, enough for most devices.
+    //    # required, enough for most devices.
     compile 'tv.danmaku.ijk.media:ijkplayer-java:0.8.4'
     compile 'tv.danmaku.ijk.media:ijkplayer-x86:0.8.4'
+    implementation project(':libvideocache')
 }

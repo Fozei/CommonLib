@@ -68,7 +68,6 @@ public class HttpProxyCacheServer {
     private HttpProxyCacheServer(Config config) {
         this.config = checkNotNull(config);
         try {
-            Log.i("***", "--->thread name : " + Thread.currentThread().getName());
             InetAddress inetAddress = InetAddress.getByName(PROXY_HOST);
             //如果设置端口为0，则系统会自动为其分配一个端口
             this.serverSocket = new ServerSocket(0, 8, inetAddress);
@@ -216,7 +215,6 @@ public class HttpProxyCacheServer {
         try {
             while (!Thread.currentThread().isInterrupted()) {
                 Socket socket = serverSocket.accept();
-                Log.i("***", "HttpProxyCacheServer.waitForRequest: --->" + socket.getInetAddress());
                 socketProcessor.submit(new SocketProcessorRunnable(socket));
             }
         } catch (IOException e) {
@@ -227,11 +225,11 @@ public class HttpProxyCacheServer {
     private void processSocket(Socket socket) {
         try {
             GetRequest request = GetRequest.read(socket.getInputStream());
-            Log.i("***", "HttpProxyCacheServer.processSocket: ------->" + request);
             String url = ProxyCacheUtils.decode(request.uri);
             if (pinger.isPingRequest(url)) {
                 pinger.responseToPing(socket);
             } else {
+                //同一个client不同的线程执行对TCP的回复
                 HttpProxyCacheServerClients clients = getClients(url);
                 clients.processRequest(request, socket);
             }
@@ -438,7 +436,6 @@ public class HttpProxyCacheServer {
 
         @Override
         public void run() {
-            Log.i("***", "WaitRequestsRunnable.run --->is sub thread : " + Thread.currentThread().getName());
             startSignal.countDown();
             waitForRequest();
         }

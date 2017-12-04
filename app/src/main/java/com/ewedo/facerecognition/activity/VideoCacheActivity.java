@@ -1,12 +1,14 @@
 package com.ewedo.facerecognition.activity;
 
 import android.app.Activity;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.util.Log;
+import android.widget.VideoView;
 
+import com.ewedo.facerecognition.BaseApplication;
 import com.ewedo.facerecognition.R;
-import com.ewedo.facerecognition.widget.IjkVideoView;
+import com.fozei.libvideocache.HttpProxyCacheServer;
 
 /**
  * Created by fozei on 17-12-1.
@@ -14,7 +16,7 @@ import com.ewedo.facerecognition.widget.IjkVideoView;
 
 public class VideoCacheActivity extends Activity {
 
-    private IjkVideoView vv;
+    private VideoView vv;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -24,10 +26,12 @@ public class VideoCacheActivity extends Activity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        vv.setVideoURI(Uri.parse("http://192.168.0.106:8000/match.mp4"));
+    protected void onStart() {
+        super.onStart();
+        HttpProxyCacheServer proxy = BaseApplication.getProxy(this);
+        String proxyUrl = proxy.getProxyUrl("http://192.168.27.9:8000/adv.mp4", false);
+        Log.i("***", "VideoCacheActivity.onStart:" + proxyUrl + "\r\n");
+        vv.setVideoPath(proxyUrl);
         vv.start();
-
     }
 }

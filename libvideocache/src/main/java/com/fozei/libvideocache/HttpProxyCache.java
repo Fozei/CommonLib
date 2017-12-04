@@ -39,12 +39,13 @@ class HttpProxyCache extends ProxyCache {
 
     public void processRequest(GetRequest request, Socket socket) throws IOException, ProxyCacheException {
         OutputStream out = new BufferedOutputStream(socket.getOutputStream());
+        Log.i("***", "HttpProxyCache.processRequest: " + out);
         String responseHeaders = newResponseHeaders(request);
+        Log.i("***", "HttpProxyCache.processRequest------->>>>>>>>>: \n" + responseHeaders);
         out.write(responseHeaders.getBytes("UTF-8"));
 
         long offset = request.rangeOffset;
         boolean useCache = isUseCache(request);
-        Log.i("***", "HttpProxyCache.processRequest useCache: " + useCache + "--->" + offset);
         if (useCache) {
             responseWithCache(out, offset);
         } else {
@@ -81,10 +82,10 @@ class HttpProxyCache extends ProxyCache {
         byte[] buffer = new byte[DEFAULT_BUFFER_SIZE];
         int readBytes;
         while ((readBytes = read(buffer, offset, buffer.length)) != -1) {
-            Log.i("***", "HttpProxyCache.responseWithCache: __________________________" + offset + "::" + readBytes);
             out.write(buffer, 0, readBytes);
             offset += readBytes;
         }
+        Log.i("***", "HttpProxyCache.responseWithCache: >>>>>>  before flush");
         out.flush();
     }
 

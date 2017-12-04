@@ -29,6 +29,7 @@ class GetRequest {
     public GetRequest(String request) {
         checkNotNull(request);
         long offset = findRangeOffset(request);
+        Log.i("***", "GetRequest.GetRequest--------->: " + offset);
         this.rangeOffset = Math.max(0, offset);
         this.partial = offset >= 0;
         this.uri = findUri(request);

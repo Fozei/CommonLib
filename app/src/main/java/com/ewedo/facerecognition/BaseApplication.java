@@ -5,6 +5,8 @@ import android.content.Context;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+import com.ewedo.facerecognition.util.Utils;
+import com.fozei.libvideocache.HttpProxyCacheServer;
 
 /**
  * Created by fozei on 17-10-26.
@@ -13,6 +15,7 @@ import com.android.volley.toolbox.Volley;
 public class BaseApplication extends Application {
     protected static Context appContext;
     private static RequestQueue mRequestQueue;
+    private HttpProxyCacheServer proxy;
 
     public static Context getContext() {
         return appContext;
@@ -27,9 +30,20 @@ public class BaseApplication extends Application {
         return mRequestQueue;
     }
 
+    public static HttpProxyCacheServer getProxy(Context context) {
+        BaseApplication app = (BaseApplication) context.getApplicationContext();
+        return app.proxy == null ? (app.proxy = app.newProxy()) : app.proxy;
+    }
+
     @Override
     public void onCreate() {
         super.onCreate();
         appContext = this;
+    }
+
+    private HttpProxyCacheServer newProxy() {
+        return new HttpProxyCacheServer.Builder(this)
+                .cacheDirectory(Utils.getVideoCacheDir(this))
+                .build();
     }
 }
