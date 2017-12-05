@@ -2,13 +2,15 @@ package com.ewedo.facerecognition.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.widget.VideoView;
 
-import com.ewedo.facerecognition.BaseApplication;
 import com.ewedo.facerecognition.R;
-import com.fozei.libvideocache.HttpProxyCacheServer;
+import com.ewedo.libserver.SimpleWebServer;
+
+import java.io.IOException;
 
 /**
  * Created by fozei on 17-12-1.
@@ -17,21 +19,26 @@ import com.fozei.libvideocache.HttpProxyCacheServer;
 public class VideoCacheActivity extends Activity {
 
     private VideoView vv;
+    private SimpleWebServer server;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_video_cache);
-        vv = findViewById(R.id.vv);
+//        vv = findViewById(R.id.vv);
+        server = new SimpleWebServer("192.168.27.13", 20000, Environment.getExternalStorageDirectory(), false);
+        try {
+            server.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        HttpProxyCacheServer proxy = BaseApplication.getProxy(this);
-        String proxyUrl = proxy.getProxyUrl("http://192.168.27.9:8000/adv.mp4", false);
-        Log.i("***", "VideoCacheActivity.onStart:" + proxyUrl + "\r\n");
-        vv.setVideoPath(proxyUrl);
-        vv.start();
+        Log.i("***", "VideoCacheActivity.onStart: " + server.isAlive());
+        String hostname = server.getHostname();
+        Log.i("***", "VideoCacheActivity.onStart: " + server.getListeningPort());
     }
 }

@@ -1,10 +1,10 @@
-package com.ewedo.libserver;
+package com.ewedo.libserver.util;
 
 /*
  * #%L
- * NanoHttpd-Webserver
+ * NanoHttpd-Core
  * %%
- * Copyright (C) 2012 - 2015 nanohttpd
+ * Copyright (C) 2012 - 2016 nanohttpd
  * %%
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
@@ -33,33 +33,15 @@ package com.ewedo.libserver;
  * #L%
  */
 
-
-import com.ewedo.libserver.response.Response;
-import com.ewedo.libserver.response.Status;
-
-import java.io.ByteArrayInputStream;
-import java.util.Map;
-
 /**
- * @author Paul S. Hawke (paul.hawke@gmail.com) On: 9/15/13 at 2:52 PM
+ * Defines a generic handler that returns an object of type O when given an
+ * object of type I.
+ *
+ * @param <I> The input type.
+ * @param <O> The output type.
+ * @author LordFokas
  */
-public class InternalRewrite extends Response {
+public interface IHandler<I, O> {
 
-    private final String uri;
-
-    private final Map<String, String> headers;
-
-    public InternalRewrite(Map<String, String> headers, String uri) {
-        super(Status.OK, NanoHTTPD.MIME_HTML, new ByteArrayInputStream(new byte[0]), 0);
-        this.headers = headers;
-        this.uri = uri;
-    }
-
-    public Map<String, String> getHeaders() {
-        return this.headers;
-    }
-
-    public String getUri() {
-        return this.uri;
-    }
+    public O handle(I input);
 }

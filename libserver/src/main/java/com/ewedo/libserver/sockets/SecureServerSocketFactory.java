@@ -1,10 +1,10 @@
-package com.ewedo.libserver;
+package com.ewedo.libserver.sockets;
 
 /*
  * #%L
- * NanoHttpd-Webserver
+ * NanoHttpd-Core
  * %%
- * Copyright (C) 2012 - 2015 nanohttpd
+ * Copyright (C) 2012 - 2016 nanohttpd
  * %%
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
@@ -33,33 +33,42 @@ package com.ewedo.libserver;
  * #L%
  */
 
+import com.ewedo.libserver.util.IFactoryThrowing;
 
-import com.ewedo.libserver.response.Response;
-import com.ewedo.libserver.response.Status;
+import java.io.IOException;
+import java.net.ServerSocket;
 
-import java.io.ByteArrayInputStream;
-import java.util.Map;
+import javax.net.ssl.SSLServerSocket;
+import javax.net.ssl.SSLServerSocketFactory;
+
 
 /**
- * @author Paul S. Hawke (paul.hawke@gmail.com) On: 9/15/13 at 2:52 PM
+ * Creates a new SSLServerSocket
  */
-public class InternalRewrite extends Response {
+public class SecureServerSocketFactory implements IFactoryThrowing<ServerSocket, IOException> {
 
-    private final String uri;
+    private SSLServerSocketFactory sslServerSocketFactory;
 
-    private final Map<String, String> headers;
+    private String[] sslProtocols;
 
-    public InternalRewrite(Map<String, String> headers, String uri) {
-        super(Status.OK, NanoHTTPD.MIME_HTML, new ByteArrayInputStream(new byte[0]), 0);
-        this.headers = headers;
-        this.uri = uri;
+    public SecureServerSocketFactory(SSLServerSocketFactory sslServerSocketFactory, String[] sslProtocols) {
+        this.sslServerSocketFactory = sslServerSocketFactory;
+        this.sslProtocols = sslProtocols;
     }
 
-    public Map<String, String> getHeaders() {
-        return this.headers;
+    @Override
+    public ServerSocket create() throws IOException {
+        SSLServerSocket ss = null;
+        ss = (SSLServerSocket) this.sslServerSocketFactory.createServerSocket();
+        if (this.sslProtocols != null) {
+            ss.setEnabledProtocols(this.sslProtocols);
+        } else {
+            ss.setEnabledProtocols(ss.getSupportedProtocols());
+        }
+        ss.setUseClientMode(false);
+        ss.setWantClientAuth(false);
+        ss.setNeedClientAuth(false);
+        return ss;
     }
 
-    public String getUri() {
-        return this.uri;
-    }
 }

@@ -2,9 +2,9 @@ package com.ewedo.libserver;
 
 /*
  * #%L
- * NanoHttpd-Webserver
+ * NanoHttpd-Core
  * %%
- * Copyright (C) 2012 - 2015 nanohttpd
+ * Copyright (C) 2012 - 2016 nanohttpd
  * %%
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
@@ -33,33 +33,67 @@ package com.ewedo.libserver;
  * #L%
  */
 
+import com.ewedo.libserver.content.CookieHandler;
+import com.ewedo.libserver.request.Method;
 
-import com.ewedo.libserver.response.Response;
-import com.ewedo.libserver.response.Status;
-
-import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
+
 /**
- * @author Paul S. Hawke (paul.hawke@gmail.com) On: 9/15/13 at 2:52 PM
+ * Handles one session, i.e. parses the HTTP request and returns the response.
  */
-public class InternalRewrite extends Response {
+public interface IHTTPSession {
 
-    private final String uri;
+    void execute() throws IOException;
 
-    private final Map<String, String> headers;
+    CookieHandler getCookies();
 
-    public InternalRewrite(Map<String, String> headers, String uri) {
-        super(Status.OK, NanoHTTPD.MIME_HTML, new ByteArrayInputStream(new byte[0]), 0);
-        this.headers = headers;
-        this.uri = uri;
-    }
+    Map<String, String> getHeaders();
 
-    public Map<String, String> getHeaders() {
-        return this.headers;
-    }
+    InputStream getInputStream();
 
-    public String getUri() {
-        return this.uri;
-    }
+    Method getMethod();
+
+    /**
+     * This method will only return the first value for a given parameter. You
+     * will want to use getParameters if you expect multiple values for a given
+     * key.
+     *
+     * @deprecated use {@link #getParameters()} instead.
+     */
+    @Deprecated
+    Map<String, String> getParms();
+
+    Map<String, List<String>> getParameters();
+
+    String getQueryParameterString();
+
+    /**
+     * @return the path part of the URL.
+     */
+    String getUri();
+
+    /**
+     * Adds the files in the request body to the files map.
+     *
+     * @param files map to modify
+     */
+    void parseBody(Map<String, String> files) throws IOException, NanoHTTPD.ResponseException;
+
+    /**
+     * Get the remote ip address of the requester.
+     *
+     * @return the IP address.
+     */
+    String getRemoteIpAddress();
+
+    /**
+     * Get the remote hostname of the requester.
+     *
+     * @return the hostname.
+     */
+    String getRemoteHostName();
 }

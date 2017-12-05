@@ -33,7 +33,8 @@ package com.ewedo.libserver;
  * #L%
  */
 
-import com.ewedo.libserver.NanoHTTPD.IHTTPSession;
+
+import com.ewedo.libserver.response.Response;
 
 import java.io.File;
 import java.util.Map;
@@ -47,5 +48,5 @@ public interface WebServerPlugin {
 
     void initialize(Map<String, String> commandLineOptions);
 
-    NanoHTTPD.Response serveFile(String uri, Map<String, String> headers, IHTTPSession session, File file, String mimeType);
+    Response serveFile(String uri, Map<String, String> headers, IHTTPSession session, File file, String mimeType);
 }

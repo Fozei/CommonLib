@@ -1,10 +1,10 @@
-package com.ewedo.libserver;
+package com.ewedo.libserver.content;
 
 /*
  * #%L
- * NanoHttpd-Webserver
+ * NanoHttpd-Core
  * %%
- * Copyright (C) 2012 - 2015 nanohttpd
+ * Copyright (C) 2012 - 2016 nanohttpd
  * %%
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
@@ -33,33 +33,46 @@ package com.ewedo.libserver;
  * #L%
  */
 
-
-import com.ewedo.libserver.response.Response;
-import com.ewedo.libserver.response.Status;
-
-import java.io.ByteArrayInputStream;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
+import java.util.TimeZone;
 
 /**
- * @author Paul S. Hawke (paul.hawke@gmail.com) On: 9/15/13 at 2:52 PM
+ * A simple cookie representation. This is old code and is flawed in many ways.
+ *
+ * @author LordFokas
  */
-public class InternalRewrite extends Response {
+public class Cookie {
 
-    private final String uri;
+    private final String n, v, e;
 
-    private final Map<String, String> headers;
-
-    public InternalRewrite(Map<String, String> headers, String uri) {
-        super(Status.OK, NanoHTTPD.MIME_HTML, new ByteArrayInputStream(new byte[0]), 0);
-        this.headers = headers;
-        this.uri = uri;
+    public Cookie(String name, String value) {
+        this(name, value, 30);
     }
 
-    public Map<String, String> getHeaders() {
-        return this.headers;
+    public Cookie(String name, String value, int numDays) {
+        this.n = name;
+        this.v = value;
+        this.e = getHTTPTime(numDays);
     }
 
-    public String getUri() {
-        return this.uri;
+    public Cookie(String name, String value, String expires) {
+        this.n = name;
+        this.v = value;
+        this.e = expires;
+    }
+
+    public static String getHTTPTime(int days) {
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+        dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+        calendar.add(Calendar.DAY_OF_MONTH, days);
+        return dateFormat.format(calendar.getTime());
+    }
+
+    public String getHTTPHeader() {
+        String fmt = "%s=%s; expires=%s";
+        return String.format(fmt, this.n, this.v, this.e);
     }
 }

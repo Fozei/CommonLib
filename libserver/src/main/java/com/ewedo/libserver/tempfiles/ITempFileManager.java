@@ -1,10 +1,10 @@
-package com.ewedo.libserver;
+package com.ewedo.libserver.tempfiles;
 
 /*
  * #%L
- * NanoHttpd-Webserver
+ * NanoHttpd-Core
  * %%
- * Copyright (C) 2012 - 2015 nanohttpd
+ * Copyright (C) 2012 - 2016 nanohttpd
  * %%
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
@@ -33,33 +33,17 @@ package com.ewedo.libserver;
  * #L%
  */
 
-
-import com.ewedo.libserver.response.Response;
-import com.ewedo.libserver.response.Status;
-
-import java.io.ByteArrayInputStream;
-import java.util.Map;
-
 /**
- * @author Paul S. Hawke (paul.hawke@gmail.com) On: 9/15/13 at 2:52 PM
+ * Temp file manager.
+ * <p/>
+ * <p>
+ * Temp file managers are created 1-to-1 with incoming requests, to create and
+ * cleanup temporary files created as a result of handling the request.
+ * </p>
  */
-public class InternalRewrite extends Response {
+public interface ITempFileManager {
 
-    private final String uri;
+    void clear();
 
-    private final Map<String, String> headers;
-
-    public InternalRewrite(Map<String, String> headers, String uri) {
-        super(Status.OK, NanoHTTPD.MIME_HTML, new ByteArrayInputStream(new byte[0]), 0);
-        this.headers = headers;
-        this.uri = uri;
-    }
-
-    public Map<String, String> getHeaders() {
-        return this.headers;
-    }
-
-    public String getUri() {
-        return this.uri;
-    }
+    public ITempFile createTempFile(String filename_hint) throws Exception;
 }

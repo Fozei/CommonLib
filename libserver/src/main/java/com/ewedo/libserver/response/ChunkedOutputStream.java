@@ -1,10 +1,10 @@
-package com.ewedo.libserver;
+package com.ewedo.libserver.response;
 
 /*
  * #%L
- * NanoHttpd-Webserver
+ * NanoHttpd-Core
  * %%
- * Copyright (C) 2012 - 2015 nanohttpd
+ * Copyright (C) 2012 - 2016 nanohttpd
  * %%
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
@@ -33,33 +33,44 @@ package com.ewedo.libserver;
  * #L%
  */
 
-
-import com.ewedo.libserver.response.Response;
-import com.ewedo.libserver.response.Status;
-
-import java.io.ByteArrayInputStream;
-import java.util.Map;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 /**
- * @author Paul S. Hawke (paul.hawke@gmail.com) On: 9/15/13 at 2:52 PM
+ * Output stream that will automatically send every write to the wrapped
+ * OutputStream according to chunked transfer:
+ * http://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.6.1
  */
-public class InternalRewrite extends Response {
+public class ChunkedOutputStream extends FilterOutputStream {
 
-    private final String uri;
-
-    private final Map<String, String> headers;
-
-    public InternalRewrite(Map<String, String> headers, String uri) {
-        super(Status.OK, NanoHTTPD.MIME_HTML, new ByteArrayInputStream(new byte[0]), 0);
-        this.headers = headers;
-        this.uri = uri;
+    public ChunkedOutputStream(OutputStream out) {
+        super(out);
     }
 
-    public Map<String, String> getHeaders() {
-        return this.headers;
+    @Override
+    public void write(int b) throws IOException {
+        byte[] data = {
+                (byte) b
+        };
+        write(data, 0, 1);
     }
 
-    public String getUri() {
-        return this.uri;
+    @Override
+    public void write(byte[] b) throws IOException {
+        write(b, 0, b.length);
+    }
+
+    @Override
+    public void write(byte[] b, int off, int len) throws IOException {
+        if (len == 0)
+            return;
+        out.write(String.format("%x\r\n", len).getBytes());
+        out.write(b, off, len);
+        out.write("\r\n".getBytes());
+    }
+
+    public void finish() throws IOException {
+        out.write("0\r\n\r\n".getBytes());
     }
 }

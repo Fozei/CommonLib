@@ -1,10 +1,10 @@
-package com.ewedo.libserver;
+package com.ewedo.libserver.tempfiles;
 
 /*
  * #%L
- * NanoHttpd-Webserver
+ * NanoHttpd-Core
  * %%
- * Copyright (C) 2012 - 2015 nanohttpd
+ * Copyright (C) 2012 - 2016 nanohttpd
  * %%
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
@@ -33,33 +33,54 @@ package com.ewedo.libserver;
  * #L%
  */
 
+import com.ewedo.libserver.NanoHTTPD;
 
-import com.ewedo.libserver.response.Response;
-import com.ewedo.libserver.response.Status;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
 
-import java.io.ByteArrayInputStream;
-import java.util.Map;
 
 /**
- * @author Paul S. Hawke (paul.hawke@gmail.com) On: 9/15/13 at 2:52 PM
+ * Default strategy for creating and cleaning up temporary files.
+ * <p/>
+ * <p>
+ * This class stores its files in the standard location (that is, wherever
+ * <code>java.io.tmpdir</code> points to). Files are added to an internal list,
+ * and deleted when no longer needed (that is, when <code>clear()</code> is
+ * invoked at the end of processing a request).
+ * </p>
  */
-public class InternalRewrite extends Response {
+public class DefaultTempFileManager implements ITempFileManager {
 
-    private final String uri;
+    private final File tmpdir;
 
-    private final Map<String, String> headers;
+    private final List<ITempFile> tempFiles;
 
-    public InternalRewrite(Map<String, String> headers, String uri) {
-        super(Status.OK, NanoHTTPD.MIME_HTML, new ByteArrayInputStream(new byte[0]), 0);
-        this.headers = headers;
-        this.uri = uri;
+    public DefaultTempFileManager() {
+        this.tmpdir = new File(System.getProperty("java.io.tmpdir"));
+        if (!tmpdir.exists()) {
+            tmpdir.mkdirs();
+        }
+        this.tempFiles = new ArrayList<ITempFile>();
     }
 
-    public Map<String, String> getHeaders() {
-        return this.headers;
+    @Override
+    public void clear() {
+        for (ITempFile file : this.tempFiles) {
+            try {
+                file.delete();
+            } catch (Exception ignored) {
+                NanoHTTPD.LOG.log(Level.WARNING, "could not delete file ", ignored);
+            }
+        }
+        this.tempFiles.clear();
     }
 
-    public String getUri() {
-        return this.uri;
+    @Override
+    public ITempFile createTempFile(String filename_hint) throws Exception {
+        DefaultTempFile tempFile = new DefaultTempFile(this.tmpdir);
+        this.tempFiles.add(tempFile);
+        return tempFile;
     }
 }

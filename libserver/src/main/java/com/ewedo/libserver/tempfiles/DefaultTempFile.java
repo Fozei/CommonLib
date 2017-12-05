@@ -1,10 +1,10 @@
-package com.ewedo.libserver;
+package com.ewedo.libserver.tempfiles;
 
 /*
  * #%L
- * NanoHttpd-Webserver
+ * NanoHttpd-Core
  * %%
- * Copyright (C) 2012 - 2015 nanohttpd
+ * Copyright (C) 2012 - 2016 nanohttpd
  * %%
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
@@ -33,33 +33,48 @@ package com.ewedo.libserver;
  * #L%
  */
 
+import com.ewedo.libserver.NanoHTTPD;
 
-import com.ewedo.libserver.response.Response;
-import com.ewedo.libserver.response.Status;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
-import java.io.ByteArrayInputStream;
-import java.util.Map;
 
 /**
- * @author Paul S. Hawke (paul.hawke@gmail.com) On: 9/15/13 at 2:52 PM
+ * Default strategy for creating and cleaning up temporary files.
+ * <p/>
+ * <p>
+ * By default, files are created by <code>File.createTempFile()</code> in the
+ * directory specified.
+ * </p>
  */
-public class InternalRewrite extends Response {
+public class DefaultTempFile implements ITempFile {
 
-    private final String uri;
+    private final File file;
 
-    private final Map<String, String> headers;
+    private final OutputStream fstream;
 
-    public InternalRewrite(Map<String, String> headers, String uri) {
-        super(Status.OK, NanoHTTPD.MIME_HTML, new ByteArrayInputStream(new byte[0]), 0);
-        this.headers = headers;
-        this.uri = uri;
+    public DefaultTempFile(File tempdir) throws IOException {
+        this.file = File.createTempFile("NanoHTTPD-", "", tempdir);
+        this.fstream = new FileOutputStream(this.file);
     }
 
-    public Map<String, String> getHeaders() {
-        return this.headers;
+    @Override
+    public void delete() throws Exception {
+        NanoHTTPD.safeClose(this.fstream);
+        if (!this.file.delete()) {
+            throw new Exception("could not delete temporary file: " + this.file.getAbsolutePath());
+        }
     }
 
-    public String getUri() {
-        return this.uri;
+    @Override
+    public String getName() {
+        return this.file.getAbsolutePath();
+    }
+
+    @Override
+    public OutputStream open() throws Exception {
+        return this.fstream;
     }
 }

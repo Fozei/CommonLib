@@ -1,42 +1,10 @@
 package com.ewedo.libserver;
 
-/*
- * #%L
- * NanoHttpd-Webserver
- * %%
- * Copyright (C) 2012 - 2015 nanohttpd
- * %%
- * Redistribution and use in source and binary forms, with or without modification,
- * are permitted provided that the following conditions are met:
- * 
- * 1. Redistributions of source code must retain the above copyright notice, this
- *    list of conditions and the following disclaimer.
- * 
- * 2. Redistributions in binary form must reproduce the above copyright notice,
- *    this list of conditions and the following disclaimer in the documentation
- *    and/or other materials provided with the distribution.
- * 
- * 3. Neither the name of the nanohttpd nor the names of its contributors
- *    may be used to endorse or promote products derived from this software without
- *    specific prior written permission.
- * 
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
- * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
- * INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
- * OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
- * OF THE POSSIBILITY OF SUCH DAMAGE.
- * #L%
- */
 
-import android.content.ContentResolver;
-import android.content.Context;
-
-import com.ewedo.libserver.NanoHTTPD.Response.IStatus;
+import com.ewedo.libserver.request.Method;
+import com.ewedo.libserver.response.IStatus;
+import com.ewedo.libserver.response.Response;
+import com.ewedo.libserver.response.Status;
 import com.ewedo.libserver.util.ServerRunner;
 
 import java.io.ByteArrayOutputStream;
@@ -72,9 +40,9 @@ public class SimpleWebServer extends NanoHTTPD {
             add("index.htm");
         }
     };
-    public final static String ACCESS_CONTROL_ALLOW_HEADER_PROPERTY_NAME = "AccessControlAllowHeader";
     // explicitly relax visibility to package for tests purposes
-    final static String DEFAULT_ALLOWED_HEADERS = "origin,accept,content-type";
+    public final static String DEFAULT_ALLOWED_HEADERS = "origin,accept,content-type";
+    public final static String ACCESS_CONTROL_ALLOW_HEADER_PROPERTY_NAME = "AccessControlAllowHeader";
     /**
      * The distribution licence
      */
@@ -104,15 +72,13 @@ public class SimpleWebServer extends NanoHTTPD {
     private final boolean quiet;
     private final String cors;
     protected List<File> rootDirs;
-    private ContentResolver contentResolver;
 
     public SimpleWebServer(String host, int port, File wwwroot, boolean quiet, String cors) {
         this(host, port, Collections.singletonList(wwwroot), quiet, cors);
     }
 
-    public SimpleWebServer(String host, int port, File wwwroot, boolean quiet, Context context) {
+    public SimpleWebServer(String host, int port, File wwwroot, boolean quiet) {
         this(host, port, Collections.singletonList(wwwroot), quiet, null);
-        this.contentResolver = context.getContentResolver();
     }
 
     public SimpleWebServer(String host, int port, List<File> wwwroots, boolean quiet) {
@@ -227,15 +193,9 @@ public class SimpleWebServer extends NanoHTTPD {
     }
 
     public static Response newFixedLengthResponse(IStatus status, String mimeType, String message) {
-        Response response = NanoHTTPD.newFixedLengthResponse(status, mimeType, message);
+        Response response = Response.newFixedLengthResponse(status, mimeType, message);
         response.addHeader("Accept-Ranges", "bytes");
         return response;
-    }
-
-    public void closeServer() {
-        if (isAlive()) {
-            closeAllConnections();
-        }
     }
 
     private boolean canServeUri(String uri, File homeDir) {
@@ -285,15 +245,15 @@ public class SimpleWebServer extends NanoHTTPD {
     }
 
     protected Response getForbiddenResponse(String s) {
-        return newFixedLengthResponse(Response.Status.FORBIDDEN, NanoHTTPD.MIME_PLAINTEXT, "FORBIDDEN: " + s);
+        return Response.newFixedLengthResponse(Status.FORBIDDEN, NanoHTTPD.MIME_PLAINTEXT, "FORBIDDEN: " + s);
     }
 
     protected Response getInternalErrorResponse(String s) {
-        return newFixedLengthResponse(Response.Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, "INTERNAL ERROR: " + s);
+        return Response.newFixedLengthResponse(Status.INTERNAL_ERROR, NanoHTTPD.MIME_PLAINTEXT, "INTERNAL ERROR: " + s);
     }
 
     protected Response getNotFoundResponse() {
-        return newFixedLengthResponse(Response.Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Error 404, file not found.");
+        return Response.newFixedLengthResponse(Status.NOT_FOUND, NanoHTTPD.MIME_PLAINTEXT, "Error 404, file not found.");
     }
 
     /**
@@ -374,7 +334,7 @@ public class SimpleWebServer extends NanoHTTPD {
         // First let's handle CORS OPTION query
         Response r;
         if (cors != null && Method.OPTIONS.equals(session.getMethod())) {
-            r = new NanoHTTPD.Response(Response.Status.OK, MIME_PLAINTEXT, null, 0);
+            r = Response.newFixedLengthResponse(Status.OK, MIME_PLAINTEXT, null, 0);
         } else {
             r = defaultRespond(headers, session, uri);
         }
@@ -410,31 +370,27 @@ public class SimpleWebServer extends NanoHTTPD {
         // Browsers get confused without '/' after the directory, send a
         // redirect.
         File f = new File(homeDir, uri);
-//        if (f.isDirectory() && !uri.endsWith("/")) {
-//            uri += "/";
-//            Response res =
-//                    newFixedLengthResponse(Response.Status.REDIRECT, NanoHTTPD.MIME_HTML, "<html><body>Redirected: <a href=\"" + uri + "\">" + uri + "</a></body></html>");
-//            res.addHeader("Location", uri);
-//            return res;
-//        }
+        if (f.isDirectory() && !uri.endsWith("/")) {
+            uri += "/";
+            Response res = newFixedLengthResponse(Status.REDIRECT, NanoHTTPD.MIME_HTML, "<html><body>Redirected: <a href=\"" + uri + "\">" + uri + "</a></body></html>");
+            res.addHeader("Location", uri);
+            return res;
+        }
 
         if (f.isDirectory()) {
             // First look for index files (index.html, index.htm, etc) and if
             // none found, list the directory if readable.
-//            String indexFile = findIndexFileInDirectory(f);
-//            if (indexFile == null) {
-//                if (f.canRead()) {
-//                    // No index file, list the directory if it is readable
-//                    return newFixedLengthResponse(Response.Status.OK, NanoHTTPD.MIME_HTML, listDirectory(uri, f));
-//                } else {
-//                    return getForbiddenResponse("No directory listing.");
-//                }
-//            } else {
-//                return respond(headers, session, uri + indexFile);
-//            }//added by ly
-            Response res =
-                    newFixedLengthResponse(Response.Status.REDIRECT, NanoHTTPD.MIME_HTML, "not use browser");
-
+            String indexFile = findIndexFileInDirectory(f);
+            if (indexFile == null) {
+                if (f.canRead()) {
+                    // No index file, list the directory if it is readable
+                    return newFixedLengthResponse(Status.OK, NanoHTTPD.MIME_HTML, listDirectory(uri, f));
+                } else {
+                    return getForbiddenResponse("No directory listing.");
+                }
+            } else {
+                return respond(headers, session, uri + indexFile);
+            }
         }
         String mimeTypeForFile = getMimeTypeForFile(uri);
         WebServerPlugin plugin = SimpleWebServer.mimeTypeHandlers.get(mimeTypeForFile);
@@ -456,36 +412,6 @@ public class SimpleWebServer extends NanoHTTPD {
         Map<String, String> header = session.getHeaders();
         Map<String, String> parms = session.getParms();
         String uri = session.getUri();
-        String id = uri.substring(uri.lastIndexOf(File.separator) + 1, uri.lastIndexOf("."));
-//        if(uri.contains(CanAVType.Image.name())){
-//            String columns[] = new String[]{MediaStore.Images.Media.DATA};
-//            Cursor cursor = contentResolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, columns,
-//                    MediaStore.Images.Media._ID + "=?",
-//                    new String[]{id}, null);
-//            if(cursor.moveToFirst()){
-//                int pathIndex = cursor.getColumnIndex(MediaStore.Images.Media.DATA);
-//                uri = cursor.getString(pathIndex);
-//            }
-//            cursor.close();
-//        }else if(uri.contains(CanAVType.Audio.name())){
-//            String columns[] = new String[]{MediaStore.Audio.Media.DATA};
-//            Cursor cursor = contentResolver.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-//                columns, MediaStore.Audio.Media._ID + "=?", new String[]{id}, null);
-//            if(cursor.moveToFirst()){
-//                int pathIndex = cursor.getColumnIndex(MediaStore.Audio.Media.DATA);
-//                uri = cursor.getString(pathIndex);
-//            }
-//            cursor.close();
-//        }else if(uri.contains(CanAVType.Video.name())){
-//            String columns[] = new String[]{MediaStore.Video.Media.DATA};
-//            Cursor cursor = contentResolver.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-//                    columns, MediaStore.Video.Media._ID + "=?", new String[]{id}, null);
-//            if(cursor.moveToFirst()){
-//                int pathIndex = cursor.getColumnIndex(MediaStore.Video.Media.DATA);
-//                uri = cursor.getString(pathIndex);
-//            }
-//            cursor.close();
-//        }
 
         if (!this.quiet) {
             System.out.println(session.getMethod() + " '" + uri + "' ");
@@ -559,7 +485,7 @@ public class SimpleWebServer extends NanoHTTPD {
                     // and the startFrom of the range is satisfiable
                     // would return range from file
                     // respond with not-modified
-                    res = newFixedLengthResponse(Response.Status.NOT_MODIFIED, mime, "");
+                    res = newFixedLengthResponse(Status.NOT_MODIFIED, mime, "");
                     res.addHeader("ETag", etag);
                 } else {
                     if (endAt < 0) {
@@ -573,7 +499,7 @@ public class SimpleWebServer extends NanoHTTPD {
                     FileInputStream fis = new FileInputStream(file);
                     fis.skip(startFrom);
 
-                    res = newFixedLengthResponse(Response.Status.PARTIAL_CONTENT, mime, fis, newLen);
+                    res = Response.newFixedLengthResponse(Status.PARTIAL_CONTENT, mime, fis, newLen);
                     res.addHeader("Accept-Ranges", "bytes");
                     res.addHeader("Content-Length", "" + newLen);
                     res.addHeader("Content-Range", "bytes " + startFrom + "-" + endAt + "/" + fileLen);
@@ -584,21 +510,21 @@ public class SimpleWebServer extends NanoHTTPD {
                 if (headerIfRangeMissingOrMatching && range != null && startFrom >= fileLen) {
                     // return the size of the file
                     // 4xx responses are not trumped by if-none-match
-                    res = newFixedLengthResponse(Response.Status.RANGE_NOT_SATISFIABLE, NanoHTTPD.MIME_PLAINTEXT, "");
+                    res = newFixedLengthResponse(Status.RANGE_NOT_SATISFIABLE, NanoHTTPD.MIME_PLAINTEXT, "");
                     res.addHeader("Content-Range", "bytes */" + fileLen);
                     res.addHeader("ETag", etag);
                 } else if (range == null && headerIfNoneMatchPresentAndMatching) {
                     // full-file-fetch request
                     // would return entire file
                     // respond with not-modified
-                    res = newFixedLengthResponse(Response.Status.NOT_MODIFIED, mime, "");
+                    res = newFixedLengthResponse(Status.NOT_MODIFIED, mime, "");
                     res.addHeader("ETag", etag);
                 } else if (!headerIfRangeMissingOrMatching && headerIfNoneMatchPresentAndMatching) {
                     // range request that doesn't match current etag
                     // would return entire (different) file
                     // respond with not-modified
 
-                    res = newFixedLengthResponse(Response.Status.NOT_MODIFIED, mime, "");
+                    res = newFixedLengthResponse(Status.NOT_MODIFIED, mime, "");
                     res.addHeader("ETag", etag);
                 } else {
                     // supply the file
@@ -616,7 +542,7 @@ public class SimpleWebServer extends NanoHTTPD {
 
     private Response newFixedFileResponse(File file, String mime) throws FileNotFoundException {
         Response res;
-        res = newFixedLengthResponse(Response.Status.OK, mime, new FileInputStream(file), (int) file.length());
+        res = Response.newFixedLengthResponse(Status.OK, mime, new FileInputStream(file), (int) file.length());
         res.addHeader("Accept-Ranges", "bytes");
         return res;
     }

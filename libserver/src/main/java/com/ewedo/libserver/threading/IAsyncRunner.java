@@ -1,10 +1,10 @@
-package com.ewedo.libserver;
+package com.ewedo.libserver.threading;
 
 /*
  * #%L
- * NanoHttpd-Webserver
+ * NanoHttpd-Core
  * %%
- * Copyright (C) 2012 - 2015 nanohttpd
+ * Copyright (C) 2012 - 2016 nanohttpd
  * %%
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
@@ -34,32 +34,16 @@ package com.ewedo.libserver;
  */
 
 
-import com.ewedo.libserver.response.Response;
-import com.ewedo.libserver.response.Status;
-
-import java.io.ByteArrayInputStream;
-import java.util.Map;
+import com.ewedo.libserver.ClientHandler;
 
 /**
- * @author Paul S. Hawke (paul.hawke@gmail.com) On: 9/15/13 at 2:52 PM
+ * Pluggable strategy for asynchronously executing requests.
  */
-public class InternalRewrite extends Response {
+public interface IAsyncRunner {
 
-    private final String uri;
+    void closeAll();
 
-    private final Map<String, String> headers;
+    void closed(ClientHandler clientHandler);
 
-    public InternalRewrite(Map<String, String> headers, String uri) {
-        super(Status.OK, NanoHTTPD.MIME_HTML, new ByteArrayInputStream(new byte[0]), 0);
-        this.headers = headers;
-        this.uri = uri;
-    }
-
-    public Map<String, String> getHeaders() {
-        return this.headers;
-    }
-
-    public String getUri() {
-        return this.uri;
-    }
+    void exec(ClientHandler code);
 }

@@ -1,10 +1,10 @@
-package com.ewedo.libserver;
+package com.ewedo.libserver.tempfiles;
 
 /*
  * #%L
- * NanoHttpd-Webserver
+ * NanoHttpd-Core
  * %%
- * Copyright (C) 2012 - 2015 nanohttpd
+ * Copyright (C) 2012 - 2016 nanohttpd
  * %%
  * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
@@ -33,33 +33,21 @@ package com.ewedo.libserver;
  * #L%
  */
 
-
-import com.ewedo.libserver.response.Response;
-import com.ewedo.libserver.response.Status;
-
-import java.io.ByteArrayInputStream;
-import java.util.Map;
+import java.io.OutputStream;
 
 /**
- * @author Paul S. Hawke (paul.hawke@gmail.com) On: 9/15/13 at 2:52 PM
+ * A temp file.
+ * <p/>
+ * <p>
+ * Temp files are responsible for managing the actual temporary storage and
+ * cleaning themselves up when no longer needed.
+ * </p>
  */
-public class InternalRewrite extends Response {
+public interface ITempFile {
 
-    private final String uri;
+    public void delete() throws Exception;
 
-    private final Map<String, String> headers;
+    public String getName();
 
-    public InternalRewrite(Map<String, String> headers, String uri) {
-        super(Status.OK, NanoHTTPD.MIME_HTML, new ByteArrayInputStream(new byte[0]), 0);
-        this.headers = headers;
-        this.uri = uri;
-    }
-
-    public Map<String, String> getHeaders() {
-        return this.headers;
-    }
-
-    public String getUri() {
-        return this.uri;
-    }
+    public OutputStream open() throws Exception;
 }
