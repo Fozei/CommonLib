@@ -38,6 +38,8 @@ import com.ewedo.libserver.ClientHandler;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Default threading strategy for NanoHTTPD.
@@ -52,6 +54,7 @@ public class DefaultAsyncRunner implements IAsyncRunner {
 
     private final List<ClientHandler> running = Collections.synchronizedList(new ArrayList<ClientHandler>());
     protected long requestCount;
+    private ExecutorService threadPool = Executors.newCachedThreadPool();
 
     /**
      * @return a list with currently running clients.
@@ -77,7 +80,8 @@ public class DefaultAsyncRunner implements IAsyncRunner {
     public void exec(ClientHandler clientHandler) {
         ++this.requestCount;
         this.running.add(clientHandler);
-        createThread(clientHandler).start();
+        threadPool.execute(clientHandler);
+//        createThread(clientHandler).start();
     }
 
     protected Thread createThread(ClientHandler clientHandler) {
