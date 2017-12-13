@@ -8,6 +8,7 @@
       <module fileurl="file://$PROJECT_DIR$/libserialhelper/libserialhelper.iml" filepath="$PROJECT_DIR$/libserialhelper/libserialhelper.iml" />
       <module fileurl="file://$PROJECT_DIR$/libserver/libserver.iml" filepath="$PROJECT_DIR$/libserver/libserver.iml" />
       <module fileurl="file://$PROJECT_DIR$/libvideocache/libvideocache.iml" filepath="$PROJECT_DIR$/libvideocache/libvideocache.iml" />
+      <module fileurl="file://$PROJECT_DIR$/libziputil/libziputil.iml" filepath="$PROJECT_DIR$/libziputil/libziputil.iml" />
       <module fileurl="file://$PROJECT_DIR$/volley/volley.iml" filepath="$PROJECT_DIR$/volley/volley.iml" />
     </modules>
   </component>

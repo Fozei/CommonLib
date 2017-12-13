@@ -1,1 +1,1 @@
-include ':app', ':libvideocache', 'volley', ':libserver', ':libserialhelper', ':libdevsearch'
+include ':app', ':libvideocache', ':libziputil', 'volley', ':libserver', ':libserialhelper', ':libdevsearch'
