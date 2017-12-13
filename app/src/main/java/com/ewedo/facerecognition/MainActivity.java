@@ -2,8 +2,11 @@ package com.ewedo.facerecognition;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
 
 import com.ewedo.ziputil.ResourceUtil;
+import com.ewedo.ziputil.ResourceUtilCallback;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -15,7 +18,23 @@ public class MainActivity extends AppCompatActivity {
 //        startActivity(intent);
 //        Intent intent = new Intent("fozei.intent.action.CACHE");
 //        startActivity(intent);
+        ResourceUtilCallback callback = new ResourceUtilCallback() {
+            @Override
+            public void onResourceReady(String... path) {
+                for (int i = 0; i < path.length; i++) {
+                    Log.i("***", "MainActivity.onResourceReady: " + path[i]);
+                }
+            }
 
-        ResourceUtil.deCompressResource(this, 1, 1, null);
+            @Override
+            public void onError(Exception e) {
+
+            }
+        };
+        ResourceUtil.deCompressResource(this, 0, 1, null);
+    }
+
+    public void onClick(View view) {
+        ResourceUtil.deCompressResource(this, 0, 1, null);
     }
 }

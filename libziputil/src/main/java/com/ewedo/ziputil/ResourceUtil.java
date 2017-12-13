@@ -1,7 +1,6 @@
 package com.ewedo.ziputil;
 
 import android.content.Context;
-import android.util.Log;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -20,70 +19,27 @@ import java.util.zip.ZipInputStream;
 
 public class ResourceUtil {
     private static final int BUFF_SIZE = 1024 * 1024; // 1M Byte
+    private static final int MEETING_HALL = 0;
 
-
-//    /**
-//     * 解压缩一个文件
-//     *
-//     * @throws IOException 当解压缩过程出错时抛出
-//     */
-//    public static void unZipFile(Context context) throws IOException {
-//        // 创建解压目标目录
-//        File filesDir = context.getFilesDir();
-//        File file = new File(filesDir+ File.separator +"resources");
-//        // 如果目标目录不存在，则创建
-//        Log.i("***", "ResourceUtil.unZipFile: " + file);
-//        if (!file.exists()) {
-//            file.mkdirs();
-//        }
-//
-//        InputStream inputStream = context.getAssets().open("1.zip");
-//        ZipInputStream zipInputStream = new ZipInputStream(inputStream);
-//        // 读取一个进入点
-//        ZipEntry nextEntry = zipInputStream.getNextEntry();
-//        byte[] buffer = new byte[1024 * 1024];
-//        int count = 0;
-//        // 如果进入点为空说明已经遍历完所有压缩包中文件和目录
-//        while (nextEntry != null) {
-//            // 如果是一个文件夹
-//            if (nextEntry.isDirectory()) {
-//                file = new File(nextEntry.getName());
-//                Log.i("***", "ResourceUtil.unZipFile: directory : "+ file);
-//                if (!file.exists()) {
-//                    file.mkdir();
-//                }
-//            } else {
-//                // 如果是文件那就保存
-//                file = new File(nextEntry.getName());
-//                Log.i("***", "ResourceUtil.unZipFile file : " + file);
-//                // 则解压文件
-//                if (!file.exists()) {
-//                    file.createNewFile();
-//                    FileOutputStream fos = new FileOutputStream(file);
-//                    while ((count = zipInputStream.read(buffer)) != -1) {
-//                        fos.write(buffer, 0, count);
-//                    }
-//
-//                    fos.close();
-//                }
-//            }
-//            nextEntry = zipInputStream.getNextEntry();
-//        }
-//        zipInputStream.close();
-//
-//
-//
-//
-//    }
-
-    public static void deCompressResource(final Context context, final int type, final int progrem, ResourceReadyCallback callback) {
+    public static void deCompressResource(final Context context, final int type, final int programID, final ResourceUtilCallback callback) {
         new Thread() {
             @Override
             public void run() {
                 try {
-                    unZipAssets(context, type, progrem);
+                    String rootDir = context.getFilesDir().toString();
+                    if (type == MEETING_HALL) {
+                        unZipAssets(context, rootDir, type);
+                    }
+                    unZipAssets(context, rootDir, programID);
+                    if (callback != null) {
+                        callback.onResourceReady(rootDir + File.separator + programID, rootDir + File.separator + type);
+                    } else {
+                        throw new NullPointerException("call back is null");
+                    }
                 } catch (Exception e) {
-                    Log.i("***", "ResourceUtil.run: Error " + e.getMessage());
+                    if (callback != null) {
+                        callback.onError(e);
+                    }
                 }
             }
         }.start();
@@ -129,25 +85,16 @@ public class ResourceUtil {
         zf.close();
     }
 
-    /**
-     * 解压缩一个文件
-     *
-     * @throws IOException 当解压缩过程出错时抛出
-     */
-    public static void unZipAssets(Context context, int type, int progrem) throws IOException {
-        File file = new File(context.getFilesDir(), "resource");
-        String rootDirectory = file.toString();
+    public static void unZipAssets(Context context, String rootDirectory, int programID) throws IOException {
+        File file = new File(rootDirectory);
 
         if (!file.exists()) {
             file.mkdirs();
         }
 
-        String[] list = context.getAssets().list("/assets");
-        for (int i = 0; i < list.length; i++) {
-            Log.i("***", "ResourceUtil.unZipAssets: " + list[i]);
-        }
+        String resName = programID + ".zip";
 
-        InputStream inputStream = context.getAssets().open("1.zip");
+        InputStream inputStream = context.getAssets().open(resName);
         ZipInputStream zipInputStream = new ZipInputStream(inputStream);
         ZipEntry zipEntry = zipInputStream.getNextEntry();
         byte[] buffer = new byte[1024 * 1024];
