@@ -32,20 +32,21 @@ public class ResourceUtil {
     private static final int SENCE_8 = 8;
 
 
-    public static void deCompressResource(final Activity activity, final ResourceUtilCallback callback, final String... programID) {
+    public static void deCompressResource(final Activity activity, final ResourceUtilCallback callback, final int... programID) {
         new Thread() {
             @Override
             public void run() {
                 try {
                     String rootDir = getRootDir(activity);
-                    for (String aProgramID : programID) {
-                        unZipAssets(activity, rootDir, aProgramID);
+                    for (int aProgramID : programID) {
+                        String targetDir = rootDir + File.separator + aProgramID;
+                        unZipAssets(activity, targetDir, aProgramID);
                     }
 
                     if (callback != null && (!activity.isFinishing())) {
                         String[] results = new String[programID.length];
                         for (int i = 0; i < results.length; i++) {
-                            results[i] = rootDir + File.separator + programID[i].substring(0, programID[i].indexOf("."));
+                            results[i] = rootDir + File.separator + programID[i];
                         }
                         callback.onResourceReady(results);
                     } else {
@@ -104,14 +105,14 @@ public class ResourceUtil {
         zf.close();
     }
 
-    public static void unZipAssets(Context context, String rootDirectory, String programID) throws IOException {
-        File file = new File(rootDirectory);
+    public static void unZipAssets(Context context, String desDir, int programID) throws IOException {
+        File file = new File(desDir);
 
         if (!file.exists()) {
             file.mkdirs();
         }
 
-        String resName = programID;
+        String resName = programID + ".zip";
 
         InputStream inputStream = context.getAssets().open(resName);
         ZipInputStream zipInputStream = new ZipInputStream(inputStream);
@@ -120,12 +121,12 @@ public class ResourceUtil {
         int count = 0;
         while (zipEntry != null) {
             if (zipEntry.isDirectory()) {
-                file = new File(rootDirectory + File.separator + zipEntry.getName());
+                file = new File(desDir + File.separator + zipEntry.getName());
                 if (!file.exists()) {
                     file.mkdir();
                 }
             } else {
-                file = new File(rootDirectory + File.separator + zipEntry.getName());
+                file = new File(desDir + File.separator + zipEntry.getName());
                 if (!file.exists()) {
                     file.createNewFile();
                     FileOutputStream fileOutputStream = new FileOutputStream(file);
@@ -185,7 +186,7 @@ public class ResourceUtil {
     }
 
 
-    public static void reset(final Activity activity, final ResourceUtilCallback callback, final String... programID) {
+    public static void reset(final Activity activity, final ResourceUtilCallback callback, final int... programID) {
         new Thread() {
             @Override
             public void run() {
@@ -196,11 +197,11 @@ public class ResourceUtil {
                 }
 
                 try {
-                    for (String aProgramID : programID) {
+                    for (int aProgramID : programID) {
                         unZipAssets(activity, rootPath, aProgramID);
                     }
 
-                    if (callback != null && (activity.isFinishing())) {
+                    if (callback != null && !activity.isFinishing()) {
                         String[] results = new String[programID.length];
                         for (int i = 0; i < results.length; i++) {
                             results[i] = rootDir + File.separator + programID[i];

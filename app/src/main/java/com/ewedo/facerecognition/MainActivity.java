@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         };
-        ResourceUtil.deCompressResource(this, callback, "0.zip", "a1.zip");
+        ResourceUtil.deCompressResource(this, callback, 0, 1);
     }
 
     public void onClick(View view) {
@@ -45,9 +45,10 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onError(Exception e) {
-
+                e.printStackTrace();
+                Log.i("***", "MainActivity.onError: " + e);
             }
         };
-        ResourceUtil.reset(this, callback, "0.zip", "a1.zip");
+        ResourceUtil.reset(this, callback, 1);
     }
 }
