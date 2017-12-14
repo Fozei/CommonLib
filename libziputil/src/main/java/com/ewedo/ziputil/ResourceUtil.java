@@ -45,7 +45,7 @@ public class ResourceUtil {
                     if (callback != null && (!activity.isFinishing())) {
                         String[] results = new String[programID.length];
                         for (int i = 0; i < results.length; i++) {
-                            results[i] = rootDir + File.separator + programID[i];
+                            results[i] = rootDir + File.separator + programID[i].substring(0, programID[i].indexOf("."));
                         }
                         callback.onResourceReady(results);
                     } else {
