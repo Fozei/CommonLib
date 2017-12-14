@@ -38,11 +38,11 @@ public class ResourceUtil {
             public void run() {
                 try {
                     String rootDir = getRootDir(activity);
-                    for (int i = 0; i < programID.length; i++) {
-                        unZipAssets(activity, rootDir, programID[i]);
+                    for (int aProgramID : programID) {
+                        unZipAssets(activity, rootDir, aProgramID);
                     }
 
-                    if (callback != null && (activity.isFinishing())) {
+                    if (callback != null && (!activity.isFinishing())) {
                         String[] results = new String[programID.length];
                         for (int i = 0; i < results.length; i++) {
                             results[i] = rootDir + File.separator + programID[i];
@@ -196,8 +196,8 @@ public class ResourceUtil {
                 }
 
                 try {
-                    for (int i = 0; i < programID.length; i++) {
-                        unZipAssets(activity, rootPath, programID[i]);
+                    for (int aProgramID : programID) {
+                        unZipAssets(activity, rootPath, aProgramID);
                     }
 
                     if (callback != null && (activity.isFinishing())) {
