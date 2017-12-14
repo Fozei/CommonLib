@@ -1,8 +1,12 @@
 package com.ewedo.facerecognition;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
+
+import com.ewedo.ziputil.ResourceUtil;
+import com.ewedo.ziputil.ResourceUtilCallback;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -12,7 +16,38 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 //        Intent intent = new Intent("fozei.intent.action.SERIAL");
 //        startActivity(intent);
-        Intent intent = new Intent("fozei.intent.action.CACHE");
-        startActivity(intent);
+//        Intent intent = new Intent("fozei.intent.action.CACHE");
+//        startActivity(intent);
+        ResourceUtilCallback callback = new ResourceUtilCallback() {
+            @Override
+            public void onResourceReady(String[] path) {
+                for (int i = 0; i < path.length; i++) {
+                    Log.i("***", "MainActivity.onResourceReady: " + path[i]);
+                }
+            }
+
+            @Override
+            public void onError(Exception e) {
+
+            }
+        };
+        ResourceUtil.deCompressResource(this, callback, 0, 1);
+    }
+
+    public void onClick(View view) {
+        ResourceUtilCallback callback = new ResourceUtilCallback() {
+            @Override
+            public void onResourceReady(String[] path) {
+                for (int i = 0; i < path.length; i++) {
+                    Log.i("***", "MainActivity.onResourceReady: " + path[i]);
+                }
+            }
+
+            @Override
+            public void onError(Exception e) {
+
+            }
+        };
+        ResourceUtil.reset(this, callback, 0, 1);
     }
 }
