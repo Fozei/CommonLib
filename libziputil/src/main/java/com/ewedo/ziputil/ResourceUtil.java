@@ -32,13 +32,13 @@ public class ResourceUtil {
     private static final int SENCE_8 = 8;
 
 
-    public static void deCompressResource(final Activity activity, final ResourceUtilCallback callback, final int... programID) {
+    public static void deCompressResource(final Activity activity, final ResourceUtilCallback callback, final String... programID) {
         new Thread() {
             @Override
             public void run() {
                 try {
                     String rootDir = getRootDir(activity);
-                    for (int aProgramID : programID) {
+                    for (String aProgramID : programID) {
                         unZipAssets(activity, rootDir, aProgramID);
                     }
 
@@ -104,14 +104,14 @@ public class ResourceUtil {
         zf.close();
     }
 
-    public static void unZipAssets(Context context, String rootDirectory, int programID) throws IOException {
+    public static void unZipAssets(Context context, String rootDirectory, String programID) throws IOException {
         File file = new File(rootDirectory);
 
         if (!file.exists()) {
             file.mkdirs();
         }
 
-        String resName = programID + ".zip";
+        String resName = programID;
 
         InputStream inputStream = context.getAssets().open(resName);
         ZipInputStream zipInputStream = new ZipInputStream(inputStream);
@@ -185,7 +185,7 @@ public class ResourceUtil {
     }
 
 
-    public static void reset(final Activity activity, final ResourceUtilCallback callback, final int... programID) {
+    public static void reset(final Activity activity, final ResourceUtilCallback callback, final String... programID) {
         new Thread() {
             @Override
             public void run() {
@@ -196,7 +196,7 @@ public class ResourceUtil {
                 }
 
                 try {
-                    for (int aProgramID : programID) {
+                    for (String aProgramID : programID) {
                         unZipAssets(activity, rootPath, aProgramID);
                     }
 

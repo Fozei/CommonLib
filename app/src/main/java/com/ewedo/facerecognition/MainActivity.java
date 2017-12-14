@@ -31,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         };
-        ResourceUtil.deCompressResource(this, callback, 0, 1);
+        ResourceUtil.deCompressResource(this, callback, "0.zip", "a1.zip");
     }
 
     public void onClick(View view) {
@@ -48,6 +48,6 @@ public class MainActivity extends AppCompatActivity {
 
             }
         };
-        ResourceUtil.reset(this, callback, 0, 1);
+        ResourceUtil.reset(this, callback, "0.zip", "a1.zip");
     }
 }
