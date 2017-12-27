@@ -33,6 +33,8 @@ package com.ewedo.libserver.response;
  * #L%
  */
 
+import android.util.Log;
+
 import com.ewedo.libserver.NanoHTTPD;
 import com.ewedo.libserver.content.ContentType;
 import com.ewedo.libserver.request.Method;
@@ -158,6 +160,7 @@ public class Response implements Closeable {
      */
     public static Response newFixedLengthResponse(IStatus status, String mimeType, String txt) {
         ContentType contentType = new ContentType(mimeType);
+        Log.i("***", "Response.newFixedLengthResponse txt is Empty ? : " + txt);
         if (txt == null) {
             return newFixedLengthResponse(status, mimeType, new ByteArrayInputStream(new byte[0]), 0);
         } else {

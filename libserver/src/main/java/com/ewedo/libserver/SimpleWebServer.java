@@ -1,6 +1,8 @@
 package com.ewedo.libserver;
 
 
+import android.util.Log;
+
 import com.ewedo.libserver.request.Method;
 import com.ewedo.libserver.response.IStatus;
 import com.ewedo.libserver.response.Response;
@@ -409,6 +411,7 @@ public class SimpleWebServer extends NanoHTTPD {
 
     @Override
     public Response serve(IHTTPSession session) {
+        Log.i("***", "SimpleWebServer.serve: " + session);
         Map<String, String> header = session.getHeaders();
         Map<String, String> parms = session.getParms();
         String uri = session.getUri();

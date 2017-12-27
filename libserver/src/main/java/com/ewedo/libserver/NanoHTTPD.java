@@ -33,6 +33,8 @@ package com.ewedo.libserver;
  * #L%
  */
 
+import android.util.Log;
+
 import com.ewedo.libserver.response.Response;
 import com.ewedo.libserver.response.Status;
 import com.ewedo.libserver.sockets.DefaultServerSocketFactory;
@@ -200,8 +202,9 @@ public abstract class NanoHTTPD {
         this.httpHandler = new IHandler<IHTTPSession, Response>() {
 
             @Override
-            public Response handle(IHTTPSession input) {
-                return NanoHTTPD.this.serve(input);
+            public Response handle(IHTTPSession session) {
+                Log.i("***", "NanoHTTPD.handle: " + session);
+                return NanoHTTPD.this.serve(session);
             }
         };
     }

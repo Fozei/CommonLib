@@ -5,8 +5,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 
+import com.ewedo.libserver.SimpleWebServer;
 import com.ewedo.ziputil.ResourceUtil;
 import com.ewedo.ziputil.ResourceUtilCallback;
+
+import java.io.File;
+import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -18,20 +22,27 @@ public class MainActivity extends AppCompatActivity {
 //        startActivity(intent);
 //        Intent intent = new Intent("fozei.intent.action.CACHE");
 //        startActivity(intent);
-        ResourceUtilCallback callback = new ResourceUtilCallback() {
-            @Override
-            public void onResourceReady(String[] path) {
-                for (int i = 0; i < path.length; i++) {
-                    Log.i("***", "MainActivity.onResourceReady: " + path[i]);
-                }
-            }
-
-            @Override
-            public void onError(Exception e) {
-
-            }
-        };
-        ResourceUtil.deCompressResource(this, callback, 0, 1);
+        SimpleWebServer server = new SimpleWebServer("192.168.27.5", 50001, new File("/storage/"), true);
+        try {
+            server.start();
+        } catch (IOException e) {
+            Log.i("***", "MainActivity.onCreate: " + e.getMessage());
+            e.printStackTrace();
+        }
+//        ResourceUtilCallback callback = new ResourceUtilCallback() {
+//            @Override
+//            public void onResourceReady(String[] path) {
+//                for (int i = 0; i < path.length; i++) {
+//                    Log.i("***", "MainActivity.onResourceReady: " + path[i]);
+//                }
+//            }
+//
+//            @Override
+//            public void onError(Exception e) {
+//
+//            }
+//        };
+//        ResourceUtil.deCompressResource(this, callback, 0, 1);
     }
 
     public void onClick(View view) {

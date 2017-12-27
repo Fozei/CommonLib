@@ -58,7 +58,8 @@ public class ServerRunnable implements Runnable {
     @Override
     public void run() {
         try {
-            httpd.getMyServerSocket().bind(httpd.hostname != null ? new InetSocketAddress(httpd.hostname, httpd.myPort) : new InetSocketAddress(httpd.myPort));
+            InetSocketAddress socketAddress = httpd.hostname != null ? new InetSocketAddress(httpd.hostname, httpd.myPort) : new InetSocketAddress(httpd.myPort);
+            httpd.getMyServerSocket().bind(socketAddress);
             hasBinded = true;
         } catch (IOException e) {
             this.bindException = e;
@@ -66,12 +67,12 @@ public class ServerRunnable implements Runnable {
         }
         do {
             try {
-                final Socket finalAccept = httpd.getMyServerSocket().accept();
+                final Socket socket = httpd.getMyServerSocket().accept();
                 if (this.timeout > 0) {
-                    finalAccept.setSoTimeout(this.timeout);
+                    socket.setSoTimeout(this.timeout);
                 }
-                final InputStream inputStream = finalAccept.getInputStream();
-                httpd.asyncRunner.exec(httpd.createClientHandler(finalAccept, inputStream));
+                final InputStream inputStream = socket.getInputStream();
+                httpd.asyncRunner.exec(httpd.createClientHandler(socket, inputStream));
             } catch (IOException e) {
                 NanoHTTPD.LOG.log(Level.FINE, "Communication with the client broken", e);
             }

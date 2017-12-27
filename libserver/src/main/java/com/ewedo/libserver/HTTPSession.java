@@ -33,6 +33,8 @@ package com.ewedo.libserver;
  * #L%
  */
 
+import android.util.Log;
+
 import com.ewedo.libserver.content.ContentType;
 import com.ewedo.libserver.content.CookieHandler;
 import com.ewedo.libserver.request.Method;
@@ -121,16 +123,20 @@ public class HTTPSession implements IHTTPSession {
         this.outputStream = outputStream;
         this.remoteIp = inetAddress.isLoopbackAddress() || inetAddress.isAnyLocalAddress() ? "127.0.0.1" : inetAddress.getHostAddress().toString();
         this.remoteHostname = inetAddress.isLoopbackAddress() || inetAddress.isAnyLocalAddress() ? "localhost" : inetAddress.getHostName().toString();
-        this.headers = new HashMap<String, String>();
+        this.headers = new HashMap<>();
     }
 
     /**
      * Decodes the sent headers and loads the data into Key/value pairs
      */
     private void decodeHeader(BufferedReader in, Map<String, String> pre, Map<String, List<String>> parms, Map<String, String> headers) throws NanoHTTPD.ResponseException {
+        //in a buffered reader with max 8k data,
+        // pre a new HashMap,
+        // parms and headers a empty HashMap
         try {
             // Read the request line
             String inLine = in.readLine();
+            Log.i("***", "HTTPSession.decodeHeader 请求行 yes! : " + inLine);
             if (inLine == null) {
                 return;
             }
@@ -177,6 +183,21 @@ public class HTTPSession implements IHTTPSession {
             }
 
             pre.put("uri", uri);
+//            Set<Map.Entry<String, String>> entries = pre.entrySet();
+//            for (Map.Entry<String, String> next : entries) {
+//                Log.i("***", "HTTPSession.decodeHeader pre : " + next);
+//            }
+//
+//            Set<Map.Entry<String, List<String>>> entries1 = parms.entrySet();
+//            for (Map.Entry<String, List<String>> anEntries1 : entries1) {
+//                Log.i("***", "HTTPSession.decodeHeader params : " + anEntries1);
+//            }
+//
+//            Set<Map.Entry<String, String>> entries2 = headers.entrySet();
+//            for (Map.Entry<String, String> anEntries2 : entries2) {
+//                Log.i("***", "HTTPSession.decodeHeader headers : " + anEntries2);
+//            }
+
         } catch (IOException ioe) {
             throw new NanoHTTPD.ResponseException(Status.INTERNAL_ERROR, "SERVER INTERNAL ERROR: IOException: " + ioe.getMessage(), ioe);
         }
@@ -349,6 +370,7 @@ public class HTTPSession implements IHTTPSession {
             this.inputStream.mark(HTTPSession.BUFSIZE);
             try {
                 read = this.inputStream.read(buf, 0, HTTPSession.BUFSIZE);
+                Log.i("***", "HTTPSession.execute the first 8k data is : " + new String(buf));
             } catch (SSLException e) {
                 throw e;
             } catch (IOException e) {
@@ -363,8 +385,12 @@ public class HTTPSession implements IHTTPSession {
                 throw new SocketException("NanoHttpd Shutdown");
             }
             while (read > 0) {
+                //第一次读取了多少位数据
+                Log.i("***", "HTTPSession.execute 第一次读取了多少位数据 : " + read);
                 this.rlen += read;
+                //请求头和请求体的分割点是哪个字节
                 this.splitbyte = findHeaderEnd(buf, this.rlen);
+                Log.i("***", "HTTPSession.execute 请求头和请求体的分割点是哪个字节 : " + splitbyte);
                 if (this.splitbyte > 0) {
                     break;
                 }
@@ -388,8 +414,10 @@ public class HTTPSession implements IHTTPSession {
 
             // Decode the header into parms and header java properties
             Map<String, String> pre = new HashMap<String, String>();
+            //hin a buffered reader, pre a new HashMap, parms and headers a empty HashMap
+            //填充pre，parms和headers
             decodeHeader(hin, pre, this.parms, this.headers);
-
+            Log.i("***", "HTTPSession.execute remoteIp : " + remoteIp);
             if (null != this.remoteIp) {
                 this.headers.put("remote-addr", this.remoteIp);
                 this.headers.put("http-client-ip", this.remoteIp);
